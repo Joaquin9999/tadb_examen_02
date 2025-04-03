@@ -1,0 +1,44 @@
+CREATE TABLE fuentes_hidricas (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+CREATE INDEX idx_fuentes_nombre ON fuentes_hidricas(nombre);
+
+
+CREATE TABLE regiones (
+    id SERIAL PRIMARY KEY,
+    region VARCHAR(255) NOT NULL
+);
+
+CREATE INDEX idx_regiones_region ON regiones(region);
+
+
+CREATE TABLE embalses (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    fuente_id INT NOT NULL,
+    region_id INT NOT NULL,
+    FOREIGN KEY (fuente_id) REFERENCES fuentes_hidricas(id),
+    FOREIGN KEY (region_id) REFERENCES regiones(id)
+);
+
+CREATE INDEX idx_embalses_fuente_id ON embalses(fuente_id);
+CREATE INDEX idx_embalses_region_id ON embalses(region_id);
+
+CREATE INDEX idx_embalses_nombre ON embalses(nombre);
+
+
+CREATE TABLE registro_aporte (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL,
+    serie_hidrologica VARCHAR(50) NOT NULL,
+    id_region INT NOT NULL,
+    aporte_hidrico NUMERIC(12,2) NOT NULL,
+    FOREIGN KEY (id_region) REFERENCES regiones(id)
+);
+
+CREATE INDEX idx_aporte_fecha ON registro_aporte(fecha);
+CREATE INDEX idx_aporte_region ON registro_aporte(id_region);
+CREATE INDEX idx_aporte_serie ON registro_aporte(serie_hidrologica);
+CREATE INDEX idx_aporte_fecha_region ON registro_aporte(fecha, id_region);

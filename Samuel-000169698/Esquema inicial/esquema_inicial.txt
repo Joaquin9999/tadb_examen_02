@@ -1,0 +1,22 @@
+create table embalses(
+id serial,
+nombre varchar(100) not null,
+fuente_hidrica varchar(100),
+region varchar(255)
+);
+
+create table serie_hidrologica(
+id serial,
+codigo varchar(50),
+embalse_nombre varchar(100),
+fuente_hidrica varchar(100),
+region varchar(255)
+);
+
+
+create table registro_aporte(
+fecha date,
+codigo_serie varchar(50),
+region varchar(100),
+aporte_hidrico numeric(12,2)
+);

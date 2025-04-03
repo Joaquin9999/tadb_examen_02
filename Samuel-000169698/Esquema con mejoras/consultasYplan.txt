@@ -1,0 +1,137 @@
+
+WITH fechas AS (
+    SELECT generate_series('2023-01-01'::date, '2024-12-31'::date, interval '1 day') AS fecha
+),
+embalses_regiones AS (
+    SELECT e.id AS embalse_id, e.nombre AS embalse_nombre, r.id AS region_id
+    FROM embalses e
+    JOIN regiones r ON r.id = e.region_id
+),
+fechas_embalses AS (
+    SELECT f.fecha, er.embalse_id, er.region_id
+    FROM fechas f
+    CROSS JOIN embalses_regiones er
+),
+aporte_por_embalse AS (
+    SELECT
+        fe.embalse_id,
+        EXTRACT(YEAR FROM fe.fecha) AS anio,
+        COUNT(ra.id) AS dias_con_dato,
+        COUNT(*) AS dias_esperados
+    FROM fechas_embalses fe
+    LEFT JOIN registro_aporte ra
+        ON ra.fecha = fe.fecha AND ra.id_region = fe.region_id
+    GROUP BY fe.embalse_id, EXTRACT(YEAR FROM fe.fecha)
+)
+SELECT
+    ae.embalse_id,
+    e.nombre AS embalse_nombre,
+    ae.anio,
+    ROUND((dias_con_dato::DECIMAL / dias_esperados) * 100, 2) AS porcentaje_completitud
+FROM aporte_por_embalse ae
+JOIN embalses e ON e.id = ae.embalse_id
+ORDER BY embalse_nombre, anio;
+
+
+
+WITH aportes_2024 AS (
+    SELECT
+        e.id AS embalse_id,
+        e.nombre AS embalse_nombre,
+        ra.aporte_hidrico
+    FROM embalses e
+    JOIN registro_aporte ra ON ra.id_region = e.region_id
+    WHERE EXTRACT(YEAR FROM ra.fecha) = 2024
+),
+resumen AS (
+    SELECT
+        embalse_id,
+        embalse_nombre,
+        MAX(aporte_hidrico) AS aporte_max,
+        MIN(aporte_hidrico) AS aporte_min
+    FROM aportes_2024
+    GROUP BY embalse_id, embalse_nombre
+)
+SELECT
+    embalse_id,
+    embalse_nombre,
+    aporte_max,
+    aporte_min,
+    ROUND(
+        CASE
+            WHEN aporte_max = 0 THEN NULL
+            ELSE ((1 - (aporte_min / aporte_max)) * 100)
+        END, 2
+    ) AS porcentaje_reduccion
+FROM resumen
+ORDER BY embalse_nombre;
+
+
+
+explain
+WITH fechas AS (
+    SELECT generate_series('2023-01-01'::date, '2024-12-31'::date, interval '1 day') AS fecha
+),
+embalses_regiones AS (
+    SELECT e.id AS embalse_id, e.nombre AS embalse_nombre, r.id AS region_id
+    FROM embalses e
+    JOIN regiones r ON r.id = e.region_id
+),
+fechas_embalses AS (
+    SELECT f.fecha, er.embalse_id, er.region_id
+    FROM fechas f
+    CROSS JOIN embalses_regiones er
+),
+aporte_por_embalse AS (
+    SELECT
+        fe.embalse_id,
+        EXTRACT(YEAR FROM fe.fecha) AS anio,
+        COUNT(ra.id) AS dias_con_dato,
+        COUNT(*) AS dias_esperados
+    FROM fechas_embalses fe
+    LEFT JOIN registro_aporte ra
+        ON ra.fecha = fe.fecha AND ra.id_region = fe.region_id
+    GROUP BY fe.embalse_id, EXTRACT(YEAR FROM fe.fecha)
+)
+SELECT
+    ae.embalse_id,
+    e.nombre AS embalse_nombre,
+    ae.anio,
+    ROUND((dias_con_dato::DECIMAL / dias_esperados) * 100, 2) AS porcentaje_completitud
+FROM aporte_por_embalse ae
+JOIN embalses e ON e.id = ae.embalse_id
+ORDER BY embalse_nombre, anio;
+
+
+explain
+WITH aportes_2024 AS (
+    SELECT
+        e.id AS embalse_id,
+        e.nombre AS embalse_nombre,
+        ra.aporte_hidrico
+    FROM embalses e
+    JOIN registro_aporte ra ON ra.id_region = e.region_id
+    WHERE EXTRACT(YEAR FROM ra.fecha) = 2024
+),
+resumen AS (
+    SELECT
+        embalse_id,
+        embalse_nombre,
+        MAX(aporte_hidrico) AS aporte_max,
+        MIN(aporte_hidrico) AS aporte_min
+    FROM aportes_2024
+    GROUP BY embalse_id, embalse_nombre
+)
+SELECT
+    embalse_id,
+    embalse_nombre,
+    aporte_max,
+    aporte_min,
+    ROUND(
+        CASE
+            WHEN aporte_max = 0 THEN NULL
+            ELSE ((1 - (aporte_min / aporte_max)) * 100)
+        END, 2
+    ) AS porcentaje_reduccion
+FROM resumen
+ORDER BY embalse_nombre;
