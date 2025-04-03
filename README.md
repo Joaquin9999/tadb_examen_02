@@ -28,5 +28,5 @@ Docker ;
 Microsoft Word / PDF ;  
 Excel ;  
 DataGrip / DBeaver ;  
-ChatGPT / Herramientas de IA ;  
+ChatGPT /DeepSeek;  
 GoogleCloud/ SQL;
