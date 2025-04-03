@@ -1,0 +1,65 @@
+WITH aportes_2024 AS (
+  SELECT
+    e.id AS embalse_id,
+    e.nombre AS embalse_nombre,
+    ra.aporte_hidrico
+  FROM embalses e
+  JOIN registro_aporte ra ON ra.id_region = e.region_id
+  WHERE YEAR(ra.fecha) = 2024
+),
+resumen AS (
+  SELECT
+    embalse_id,
+    embalse_nombre,
+    MAX(aporte_hidrico) AS aporte_max,
+    MIN(aporte_hidrico) AS aporte_min
+  FROM aportes_2024
+  GROUP BY embalse_id, embalse_nombre
+)
+SELECT
+  embalse_id,
+  embalse_nombre,
+  aporte_max,
+  aporte_min,
+  ROUND(
+    CASE
+      WHEN aporte_max = 0 THEN NULL
+      ELSE ((1 - (aporte_min / aporte_max)) * 100)
+    END, 2
+  ) AS porcentaje_reduccion
+FROM resumen
+ORDER BY embalse_nombre;
+
+EXPLAIN ANALYZE
+
+WITH aportes_2024 AS (
+  SELECT
+    e.id AS embalse_id,
+    e.nombre AS embalse_nombre,
+    ra.aporte_hidrico
+  FROM embalses e
+  JOIN registro_aporte ra ON ra.id_region = e.region_id
+  WHERE YEAR(ra.fecha) = 2024
+),
+resumen AS (
+  SELECT
+    embalse_id,
+    embalse_nombre,
+    MAX(aporte_hidrico) AS aporte_max,
+    MIN(aporte_hidrico) AS aporte_min
+  FROM aportes_2024
+  GROUP BY embalse_id, embalse_nombre
+)
+SELECT
+  embalse_id,
+  embalse_nombre,
+  aporte_max,
+  aporte_min,
+  ROUND(
+    CASE
+      WHEN aporte_max = 0 THEN NULL
+      ELSE ((1 - (aporte_min / aporte_max)) * 100)
+    END, 2
+  ) AS porcentaje_reduccion
+FROM resumen
+ORDER BY embalse_nombre;

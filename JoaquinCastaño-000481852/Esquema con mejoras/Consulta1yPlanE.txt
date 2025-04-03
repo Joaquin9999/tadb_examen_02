@@ -1,0 +1,77 @@
+WITH RECURSIVE fechas AS (
+  SELECT DATE('2023-01-01') AS fecha
+  UNION ALL
+  SELECT DATE_ADD(fecha, INTERVAL 1 DAY)
+  FROM fechas
+  WHERE fecha < '2024-12-31'
+),
+embalses_regiones AS (
+  SELECT e.id AS embalse_id, e.nombre AS embalse_nombre, r.id AS region_id
+  FROM embalses e
+  JOIN regiones r ON r.id = e.region_id
+),
+fechas_embalses AS (
+  SELECT f.fecha, er.embalse_id, er.region_id
+  FROM fechas f
+  JOIN embalses_regiones er
+),
+aporte_por_embalse AS (
+  SELECT
+    fe.embalse_id,
+    YEAR(fe.fecha) AS anio,
+    COUNT(ra.id) AS dias_con_dato,
+    COUNT(*) AS dias_esperados
+  FROM fechas_embalses fe
+  LEFT JOIN registro_aporte ra
+    ON ra.fecha = fe.fecha AND ra.id_region = fe.region_id
+  GROUP BY fe.embalse_id, YEAR(fe.fecha)
+)
+SELECT
+  ae.embalse_id,
+  e.nombre AS embalse_nombre,
+  ae.anio,
+  ROUND((dias_con_dato / dias_esperados) * 100, 2) AS porcentaje_completitud
+FROM aporte_por_embalse ae
+JOIN embalses e ON e.id = ae.embalse_id
+ORDER BY embalse_nombre, anio;
+
+EXPLAIN ANALYZE
+
+WITH RECURSIVE fechas AS (
+  SELECT DATE('2023-01-01') AS fecha
+  UNION ALL
+  SELECT DATE_ADD(fecha, INTERVAL 1 DAY)
+  FROM fechas
+  WHERE fecha < '2024-12-31'
+),
+embalses_regiones AS (
+  SELECT e.id AS embalse_id, e.nombre AS embalse_nombre, r.id AS region_id
+  FROM embalses e
+  JOIN regiones r ON r.id = e.region_id
+),
+fechas_embalses AS (
+  SELECT f.fecha, er.embalse_id, er.region_id
+  FROM fechas f
+  JOIN embalses_regiones er
+),
+aporte_por_embalse AS (
+  SELECT
+    fe.embalse_id,
+    YEAR(fe.fecha) AS anio,
+    COUNT(ra.id) AS dias_con_dato,
+    COUNT(*) AS dias_esperados
+  FROM fechas_embalses fe
+  LEFT JOIN registro_aporte ra
+    ON ra.fecha = fe.fecha AND ra.id_region = fe.region_id
+  GROUP BY fe.embalse_id, YEAR(fe.fecha)
+)
+SELECT
+  ae.embalse_id,
+  e.nombre AS embalse_nombre,
+  ae.anio,
+  ROUND((dias_con_dato / dias_esperados) * 100, 2) AS porcentaje_completitud
+FROM aporte_por_embalse ae
+JOIN embalses e ON e.id = ae.embalse_id
+ORDER BY embalse_nombre, anio;
+
+

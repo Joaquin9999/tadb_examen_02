@@ -1,0 +1,42 @@
+WITH dias_por_ano AS (
+    SELECT
+        YEAR(fecha) AS anio,
+        region AS region_hidrologica,
+        COUNT(DISTINCT fecha) AS dias_con_datos
+    FROM registro_aporte
+    GROUP BY anio, region
+),
+dias_totales AS (
+    SELECT 2023 AS anio, 365 AS total_dias
+    UNION ALL
+    SELECT 2024 AS anio, 366 AS total_dias
+)
+SELECT
+    d.anio,
+    d.region_hidrologica,
+    COALESCE((100.0 * d.dias_con_datos / dt.total_dias), 0) AS porcentaje_completitud
+FROM dias_por_ano d
+JOIN dias_totales dt ON d.anio = dt.anio
+ORDER BY d.anio, d.region_hidrologica;
+
+EXPLAIN ANALYZE
+WITH dias_por_ano AS (
+    SELECT
+        YEAR(fecha) AS anio,
+        region AS region_hidrologica,
+        COUNT(DISTINCT fecha) AS dias_con_datos
+    FROM registro_aporte
+    GROUP BY anio, region
+),
+dias_totales AS (
+    SELECT 2023 AS anio, 365 AS total_dias
+    UNION ALL
+    SELECT 2024 AS anio, 366 AS total_dias
+)
+SELECT
+    d.anio,
+    d.region_hidrologica,
+    COALESCE((100.0 * d.dias_con_datos / dt.total_dias), 0) AS porcentaje_completitud
+FROM dias_por_ano d
+JOIN dias_totales dt ON d.anio = dt.anio
+ORDER BY d.anio, d.region_hidrologica;

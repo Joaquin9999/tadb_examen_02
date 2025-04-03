@@ -1,0 +1,28 @@
+CREATE TABLE embalses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    fuente_hidrica VARCHAR(100),
+    region VARCHAR(255)
+);
+
+CREATE TABLE serie_hidrologica (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(50),
+    embalse_nombre VARCHAR(100),
+    fuente_hidrica VARCHAR(100),
+    region VARCHAR(255)
+);
+
+CREATE TABLE registro_aporte (
+    fecha DATE,
+    codigo_serie VARCHAR(50),
+    region VARCHAR(100),
+    aporte_hidrico DECIMAL(12,2)
+);
+
+
+
+CREATE USER 'JoaquinTopicos'@'localhost' IDENTIFIED BY 'SamuelYJoaquin123';
+GRANT SELECT, INSERT, UPDATE, DELETE ON TopicosExamen2.* TO 'JoaquinTopicos'@'localhost';
+FLUSH PRIVILEGES;
+SHOW GRANTS FOR 'JoaquinTopicos'@'localhost';

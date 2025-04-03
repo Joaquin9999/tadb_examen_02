@@ -1,0 +1,40 @@
+WITH aportes_2024 AS (
+    SELECT
+        codigo_serie AS embalse,
+        MIN(aporte_hidrico) AS min_aporte,
+        MAX(aporte_hidrico) AS max_aporte
+    FROM registro_aporte
+    WHERE YEAR(fecha) = 2024
+    GROUP BY codigo_serie
+)
+SELECT
+    embalse,
+    min_aporte,
+    max_aporte,
+    CASE
+        WHEN max_aporte = 0 THEN NULL
+        ELSE (100.0 * (max_aporte - min_aporte) / max_aporte)
+    END AS reduccion_porcentual
+FROM aportes_2024
+ORDER BY embalse;
+
+EXPLAIN ANALYZE
+WITH aportes_2024 AS (
+    SELECT
+        codigo_serie AS embalse,
+        MIN(aporte_hidrico) AS min_aporte,
+        MAX(aporte_hidrico) AS max_aporte
+    FROM registro_aporte
+    WHERE YEAR(fecha) = 2024
+    GROUP BY codigo_serie
+)
+SELECT
+    embalse,
+    min_aporte,
+    max_aporte,
+    CASE
+        WHEN max_aporte = 0 THEN NULL
+        ELSE (100.0 * (max_aporte - min_aporte) / max_aporte)
+    END AS reduccion_porcentual
+FROM aportes_2024
+ORDER BY embalse;
